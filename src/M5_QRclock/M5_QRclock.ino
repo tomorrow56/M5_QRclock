@@ -128,7 +128,8 @@ void loop(){
 
   if (last_min != minute()){
 //  if (last_sec != second()){
-    M5.Lcd.fillScreen(TFT_BLACK);
+//    M5.Lcd.fillScreen(TFT_BLACK);
+    M5.Lcd.fillRect(60, 20, 200, 200, TFT_WHITE);
 
     NowTime = String(year()) + "-";
 
@@ -188,7 +189,7 @@ void loop(){
     }
 
     Serial.println(NowTime);
-    M5.Lcd.qrcode(NowTime, 60, 20, 200, 3);
+    M5.Lcd.qrcode(NowTime, 70, 30, 180, 2);
 
     last_min = minute();
 //    last_sec = second();
