@@ -1,6 +1,7 @@
 # M5_QRclock
 
 This is the "QR Code Clock" for M5Stack
+
 QR code at the current time is updated every second.
 
 ![QR Clock](img/QRclock.jpg)
