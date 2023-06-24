@@ -9,14 +9,15 @@
 #endif
 
 // Include this to enable the M5 global instance.
+#include "qrcode.h"
 #include <M5Unified.h>      // https://github.com/m5stack/M5Unified
 #include <esp_log.h>
 
 #include <WiFi.h>
 #include <TimeLib.h>        // https://forum.arduino.cc/index.php?topic=415296.0
 
-const char* ssid       = "xxxxxxxx";    // your SSID
-const char* password   = "xxxxxxxx";    // your password
+const char* ssid       = "xxxxxxxx";    // your AP SSID
+const char* password   = "xxxxxxxx";    // your AP password
 IPAddress ipadr;
 
 const char* ntpServer = "ntp.nict.jp";
@@ -27,6 +28,9 @@ int yy, mon, dd;
 int retry = 5;
 int last_min = 0;
 int last_sec = 0;
+
+int qr_size = 0;
+int qr_margin = 0;
 
 void setup(){ 
   auto cfg = M5.config();
@@ -66,7 +70,7 @@ void setup(){
   M5.Display.setBrightness(128);
   M5.Display.setCursor(0, M5.Display.height()/24);
   M5.Display.setTextColor(WHITE);
-  M5.Display.setTextSize(2);
+  M5.Display.setTextSize(1);
 
   const char* name;
 
@@ -234,6 +238,37 @@ void setup(){
   M5.Display.printf("%04d-%02d-%02d %02d:%02d:%02d\n", yy, mon, dd, hh, mm, ss);
 
   M5.Display.fillScreen(TFT_BLACK);
+
+  if(M5.Display.width() <= M5.Display.height()){
+    qr_size = M5.Display.width();
+  }else{
+    qr_size = M5.Display.height();
+  }
+
+  M5.Display.fillRect((M5.Display.width() - qr_size) / 2, (M5.Display.height() - qr_size) / 2, qr_size, qr_size, TFT_WHITE);
+
+  switch (M5.getBoard()){
+    case m5::board_t::board_M5StackCoreS3:
+    case m5::board_t::board_M5Stack:
+    case m5::board_t::board_M5StackCore2:
+     // 320 x 240
+      qr_margin = 5;
+      break;
+    case m5::board_t::board_M5AtomS3:
+      // 128 x 128
+      qr_margin = 1;
+      break;
+    case m5::board_t::board_M5StickC:
+      // 80 x 160
+      qr_margin = 2;
+      break;
+    case m5::board_t::board_M5StickCPlus:
+      // 135 x 240
+      qr_margin = 4;
+      break;
+    default:
+      break;
+  }
 }
 
 void loop(){ 
@@ -297,35 +332,38 @@ void loop(){
 
     Serial.println(NowTime);
 
-
-    switch (M5.getBoard()){
-      case m5::board_t::board_M5StackCoreS3:
-      case m5::board_t::board_M5Stack:
-      case m5::board_t::board_M5StackCore2:
-       // 320 x 240
-        M5.Display.fillRect(40, 0, 240, 240, TFT_WHITE);
-        M5.Display.qrcode(NowTime, 50, 10, 220, 2);
-        break;
-      case m5::board_t::board_M5AtomS3:
-        // 128 x 128
-        M5.Display.fillRect(0, 0, 128, 128, TFT_WHITE);
-        M5.Display.qrcode(NowTime, 1, 1, 126, 2);
-        break;
-      case m5::board_t::board_M5StickC:
-        // 80 x 160
-        M5.Display.fillRect(0, 40, 80, 80, TFT_WHITE);
-        M5.Display.qrcode(NowTime, 2, 42, 76, 2);
-        break;
-      case m5::board_t::board_M5StickCPlus:
-        // 135 x 240
-        M5.Display.fillRect(0, 52, 135, 135, TFT_WHITE);
-        M5.Display.qrcode(NowTime, 4, 56, 127, 2);
-        break;
-      default:
-        break;
-    }
+    M5qrcode(NowTime, (M5.Display.width() - qr_size) / 2 + qr_margin, (M5.Display.height() - qr_size) / 2 + qr_margin, qr_size - (qr_margin * 2), 2);
 
     last_min = minute();
     last_sec = second();
   }
 } 
+
+void M5qrcode(const String &string, uint16_t x, uint16_t y, uint8_t width, uint8_t version) {
+    int16_t len = string.length() + 2;
+    char buffer[len];
+    string.toCharArray(buffer, len);
+
+    // Create the QR code
+    QRCode qrcode;
+    uint8_t qrcodeData[qrcode_getBufferSize(version)];
+    qrcode_initText(&qrcode, qrcodeData, version, 0, buffer);
+
+    // Top quiet zone
+    uint8_t thickness   = width / qrcode.size;
+    uint16_t lineLength = qrcode.size * thickness;
+    uint8_t xOffset     = x + (width - lineLength) / 2;
+    uint8_t yOffset     = y + (width - lineLength) / 2;
+//    M5.Display.fillRect(x, y, width, width, TFT_WHITE);
+
+    for (uint8_t y = 0; y < qrcode.size; y++) {
+        for (uint8_t x = 0; x < qrcode.size; x++) {
+            uint8_t q = qrcode_getModule(&qrcode, x, y);
+            if (q){
+                M5.Display.fillRect(x * thickness + xOffset, y * thickness + yOffset, thickness, thickness, TFT_BLACK);
+            }else{
+                M5.Display.fillRect(x * thickness + xOffset, y * thickness + yOffset, thickness, thickness, TFT_WHITE);
+            }
+        }
+    }
+}
