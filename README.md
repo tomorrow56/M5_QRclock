@@ -7,6 +7,8 @@ QR code at the current time is updated every second.
 ## M5Stack
 <img src="img/QRclock.jpg" width="320px">
 
+<img src="img/M5Stack_AtomS3.mp4" width="320px">
+
 <img src="img/QRcode.jpg" width="320px">
 
 ## TTGO T-Watch
