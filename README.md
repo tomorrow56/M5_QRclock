@@ -5,9 +5,8 @@ This is the "QR Code Clock" for M5Stack　and TTGO T-Watch
 QR code at the current time is updated every second.
 
 ## M5Stack
-<img src="img/QRclock.jpg" width="320px">
 
-<img src="img/M5Stack_AtomS3.mp4" width="320px">
+<img src="img/QRclock.jpg" width="320px">
 
 <img src="img/QRcode.jpg" width="320px">
 
@@ -24,3 +23,7 @@ https://twitter.com/Tomy_cn/status/1671353578324385800?s=20
 [M5Stack Official Store](https://shop.m5stack.com/)
 
 [LILYGO Wearable Kit](https://www.lilygo.cc/collections/wearable-kit)
+
+
+
+
