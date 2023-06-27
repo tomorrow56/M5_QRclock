@@ -4,6 +4,8 @@ This is the "QR Code Clock" for M5Stack　and TTGO T-Watch
 
 QR code at the current time is updated every second.
 
+<img src="img/QRclock.jpg" width="320px">
+
 ![QR Clock](img/QRclock.jpg)
 ![QR Code](img/QRcode.jpg)
 
